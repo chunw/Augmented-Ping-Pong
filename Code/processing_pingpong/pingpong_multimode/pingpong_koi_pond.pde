@@ -1,6 +1,6 @@
-//Nicholas Tang
-//Thanks to Tanmay Prakash for help with the math
-//2/1/11
+/* "Calm mode" visualization. 
+* Modified and extended from Nicholas Tang's Koi Pond sketch.
+*/
 float t;
 ArrayList fishes;
 PImage b;

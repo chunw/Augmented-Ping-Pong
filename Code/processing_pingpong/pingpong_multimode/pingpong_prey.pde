@@ -1,3 +1,5 @@
+/* "Active mode" visualization. 
+*/
 import processing.serial.*;
  
 float creatureMaxSpeed = 2;

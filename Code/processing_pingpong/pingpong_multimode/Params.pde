@@ -1,4 +1,7 @@
 /*
+* This class contains all the parameters that should be calibrated when
+* the ping pong table is setup for the first time.
+* 
 * General tips for successful hit detections:
 *    1. The Arduino board must use analog pins rather than digital pins as Inputs, and
 *       piezo sensors must be connencted in parallel with 1M ohm resistors in a parallel circuit.
