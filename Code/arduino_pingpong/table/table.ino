@@ -49,7 +49,7 @@ void loop() {
       String(curHit.pin7) + " " + 
       String(curHit.pin8)
       );
-      delay(100);
+      delay(300);
   } else {
     //Serial.println("no hit");
   }

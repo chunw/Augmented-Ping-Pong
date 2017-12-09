@@ -48,9 +48,15 @@ void loop() {
   }
    
   if (processingData == '2') {
-     colorWipe(strip.Color(0, 0, 0, 255), 50); // White
+    // White
+     colorWipe(strip.Color(0, 0, 0, 255), 50); 
   } else if (processingData == '1') {
-     whiteOverRainbow(20,75,5);  
+     // Rainbow
+     whiteOverRainbow(20,75,5); 
+  } else {   
+     // White
+    colorWipe(strip.Color(0, 0, 0, 255), 50);
+    //whiteOverRainbow(20,75,5); 
   }
    
   //pulseWhite(5); 

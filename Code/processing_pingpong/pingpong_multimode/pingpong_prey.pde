@@ -2,7 +2,7 @@
 */
 import processing.serial.*;
  
-float creatureMaxSpeed = 2;
+float creatureMaxSpeed = 4;
  
 ArrayList<Creature> creatures;
 ArrayList<Wall> walls;
@@ -27,11 +27,12 @@ void setupMode_prey() {
   for (int i = 0; i < 16; i++) {
     creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
   }
-  if (soundfile != null) {
-    soundfile.stop();
+  // music
+  if (player != null) {
+    player.close();
   }
-  soundfile = new SoundFile(this, "Ping Pong Song.mp3");
-  soundfile.loop();
+  player = minim.loadFile("Ping Pong Song.mp3");
+  player.play();
 }
 
 void drawMode_prey() {
@@ -73,7 +74,6 @@ void drawMode_prey() {
   }
 
   if (creatingWall == true) {
-    //strokeWeight(10);
     //stroke(Params.prey_mode_wall_color);
     line(wallx1, wally1, mouseX, mouseY);
   }
@@ -82,18 +82,16 @@ void drawMode_prey() {
   
   // NOTE: DO NOT READ SENSOR DATA IN THIS SKETCH; IT HAS BEEN READ IN THE MAIN SKETCH DRAW() LOOP!
   
-  //println("in pinpong_prey: sensor.isRealHit()? + " + sensor.isRealHit() + " ballloc is not null? " + (ballPosition != null));
   if (ballPosition != null && sensor.isRealHit()) {
     drawBallPosition();
-    //println("added target at x = " + ballPosition + " y = " + ballPosition.y);
-    addTarget(ballPosition.x, ballPosition.y); // TODO - randomize a little bit
+    addTarget(ballPosition.x, ballPosition.y);
     //creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
   }
   
   if (mousePressed) {
     if (wallBuildingMode == false) {
       addTarget(mouseX, mouseY);
-      creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
+      //creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
     } else {
      if (creatingWall == false) {
         creatingWall = true;
@@ -119,10 +117,6 @@ void drawBallPosition() {
   ellipse (ballPosition.x, ballPosition.y, 42, 42);
   ellipse (ballPosition.x, ballPosition.y, 41, 41);
   ellipse (ballPosition.x, ballPosition.y, 40, 40);
-}
-
-void mousePressed() {
-   
 }
 
 void addRandomPrey() {
@@ -164,7 +158,7 @@ class Wall {
 
   void display() {
     stroke(255);
-    //strokeWeight(10);
+    strokeWeight(10);
     line(loc1.x, loc1.y, loc2.x, loc2.y);
   }
 
@@ -203,7 +197,11 @@ class Creature {
     creatureType = theCreatureType;
 
     // make it look like a funky creature
-    bodyColor = color(random(255), random(255), random(255)); // set a random color
+    float r = random(255);
+    float g = random(255);
+    float b = random(255);
+    bodyColor = color(r, g, b); // set a random color
+    //println("r=" + r + ", g="+g + ", b="+b);
     if (theCreatureType == PREY) {
       bodyColor = color(0, random(200, 255), 0); // set a random color
       maxforce /= 4;
@@ -296,8 +294,6 @@ class Creature {
     return steer;
   }
 
-  // Separation
-  // Method checks for nearby creatures and steers away
   PVector separate (ArrayList<Creature> creatures, ArrayList<Wall> walls) {
     float desiredseparation = r*2;
     PVector sum = new PVector();
@@ -381,6 +377,7 @@ class Creature {
   void display() {
     fill(bodyColor);
     stroke(0);
+    strokeWeight(1);
     pushMatrix();
 
     translate(loc.x, loc.y);

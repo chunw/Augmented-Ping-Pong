@@ -1,5 +1,4 @@
 /* "Calm mode" visualization. 
-* Modified and extended from Nicholas Tang's Koi Pond sketch.
 */
 float t;
 ArrayList fishes;
@@ -17,12 +16,12 @@ void setupMode_koiPond() {
    for (int i = 1; i < numfish+1; i++) {
      fishes.add(new fish(-(width/2)/18-random(width)/18,-(height/2)/18+(floor(random(numfish))*(height/numfish))/18,(3*PI)/2,(6+floor(random(0,3))*20)/360.0,int(random(6) > 1)-random(0.1)));
    }
-   
-   if (soundfile != null) {
-     soundfile.stop();
+   // music
+   if (player != null) {
+    player.close();
    }
-   soundfile = new SoundFile(this, "Zen Garden.mp3");
-   soundfile.loop();
+   player = minim.loadFile("Zen Garden.mp3");
+   player.play();
 }
 
 void drawMode_koiPond() {
@@ -148,11 +147,6 @@ class fish {
     }
     pushMatrix();
     translate(width/2+18*pos[1],height/2+18*pos[2]);
-    //translate(width/2,height/2);
-    //scale(5);
-    //fill(360);
-    //stroke(360);
-    //ellipse(0,0,len+31,len+31);
     fill(((fcolor+0.05)*360),.3*360,360,300);
     stroke(((fcolor+0.05)*360),.3*360,360,300);
     drawShape(lenfin,pFinR);

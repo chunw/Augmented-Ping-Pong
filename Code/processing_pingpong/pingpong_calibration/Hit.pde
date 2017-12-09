@@ -1,3 +1,5 @@
+/* This class represents a Hit of pingpong ball on the table.
+ */
 class Hit {
   float x;
   float y;

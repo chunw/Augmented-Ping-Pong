@@ -12,17 +12,17 @@ BallPositionSensor sensor;
 PVector ballPosition = new PVector(0, 0);
 
 void setup() {
-  size(1000, 800);
-  //fullScreen();
+  //size(1000, 800);
+  fullScreen();
   background(0);
   sensor = new BallPositionSensor(this);
 }
 
 void draw() {
-  background(0);
+  background(255);
   Hit ballLocation = sensor.readHit();
   if (ballLocation != null) {
-    ballPosition = ballLocation.getPixelVector_raw();
+    //ballPosition = ballLocation.getPixelVector_raw();
   } 
   drawText();
   drawBallPosition();
@@ -39,11 +39,12 @@ void drawBallPosition() {
 }
 
 void drawText() {
-  fill(Params.score_board_color);
+  fill(0);
   textSize(Params.score_board_font_size);
   text(sensor.getRealHitPin(), width/2, height/2 + 100);
   text(mouseX + ", " + mouseY, width/2, height/2 + 180);
-  //text(sensor.getRawData(), 50, 600);
+  text(sensor.getRawData(), 50, 600);
+  println(sensor.getRawData());
   
   // make sure text used by the game are projected fine
   fill(Params.score_board_color);

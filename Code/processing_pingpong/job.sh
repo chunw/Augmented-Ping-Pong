@@ -1,5 +1,5 @@
 #!/bin/bash
-for dir in "pingpong_multimode" "pingpong_combined_socialmedia" "pingpong_fireball" "pingpong_koi_pond" "pingpong_prey"
+for dir in "pingpong_multimode"
 
 do
   cp pingpong_calibration/Params.pde $dir/Params.pde

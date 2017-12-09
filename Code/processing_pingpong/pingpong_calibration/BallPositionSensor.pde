@@ -6,6 +6,7 @@ import processing.serial.*;
  */
 class BallPositionSensor {
   boolean realHit = false;
+  boolean veryActiveHit = false;
   int NO_DATA = -1;
   int curHitPin = NO_DATA;
   float curHitX = NO_DATA;
@@ -27,6 +28,10 @@ class BallPositionSensor {
     return realHit;
   }
   
+  boolean veryActiveHit() {
+    return veryActiveHit;
+  }
+  
   int getRealHitPin() {
     return curHitPin;
   }  
@@ -44,7 +49,7 @@ class BallPositionSensor {
      if (arduinoSerial != null && arduinoSerial.available() > 0) {
        serialData = arduinoSerial.readStringUntil('\n');
        curHitData = serialData;
-       println(curHitData);
+       //println(curHitData);
      }
      if (serialData == null) {
       curHitData = "";
@@ -54,7 +59,6 @@ class BallPositionSensor {
       if (splitByLeftBracket != null && splitByLeftBracket.length > 1) {
        
         Hit hit = getHit(splitByLeftBracket[1]);
-        println("hit x, y = " + hit.x + " , " + hit.y);
         return hit;
       } else {
         return null;
@@ -114,25 +118,25 @@ class BallPositionSensor {
       y = Params.pin4_left_y;
     }
     if (value4 > max) {
-      max = value3;
+      max = value4;
       pinNumber = 5;
       x = Params.pin5_left_x;
       y = Params.pin5_left_y;
     }
     if (value5 > max) {
-      max = value3;
+      max = value5;
       pinNumber = 6;
       x = Params.pin6_left_x;
       y = Params.pin6_left_y;
     }
     if (value6 > max) {
-      max = value3;
+      max = value6;
       pinNumber = 7;
       x = Params.pin7_left_x;
       y = Params.pin7_left_y;
     }
     if (value7 > max) {
-      max = value3;
+      max = value7;
       pinNumber = 8;
       x = Params.pin8_left_x;
       y = Params.pin8_left_y;
@@ -145,6 +149,10 @@ class BallPositionSensor {
       realHit = true;
     } else {
       realHit = false;
+    }
+    
+    if (max > Params.activeHitThreshold) {
+      veryActiveHit = true;
     }
     
     return new PVector(x,y);

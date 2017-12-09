@@ -1,13 +1,16 @@
+import ddf.minim.*;
 import processing.serial.*;
 import processing.sound.*;
 
-int mode = 1;
+int mode = 1; // which audiovisual to use?
 
 BallPositionSensor sensor;
 PVector ballPosition = new PVector(0, 0);
 
 Serial cloudPort;
 
+Minim minim;
+AudioPlayer player;
 SoundFile soundfile;
 
 int gameStartTime;
@@ -25,14 +28,16 @@ int scorePlayer2 = 0;
 
 void setup() {
   
-  size(1000, 800);
+ //size(1000, 800);
   
-  //fullScreen();
-  
-  sensor = new BallPositionSensor(this);
+ fullScreen();
   
   //println(Serial.list());
-  cloudPort = new Serial(this, Serial.list()[Params.cloudPort], 9600);
+  if (Params.cloudPort < Serial.list().length) {
+     cloudPort = new Serial(this, Serial.list()[Params.cloudPort], 9600);
+  }
+  sensor = new BallPositionSensor(this);
+  minim = new Minim(this);
   gameStartTime = millis();
   myFont = createFont("Courier New", 40);
   textFont(myFont);
@@ -50,9 +55,9 @@ void keyPressed() {
     } else if (key == '3') {
       mode = 3;
       reset();
-    } else if (key == 'z') {
+    } else if (key == 'o') {
       scorePlayer1++;
-    } else if (key == 'm') {
+    } else if (key == 'p') {
       scorePlayer2++;
     }
 }
@@ -80,6 +85,8 @@ void draw() {
     drawMode_koiPond();
   } else if (isModeSelected_prey()) {
     drawMode_prey();
+  } else if (isModeSelected_social_media()) {
+    drawMode_social_media();
   }
   
   drawScores();
@@ -89,10 +96,19 @@ void draw() {
 void reset() {
   if (isModeSelected_koiPond()) {
      setupMode_koiPond();
-     cloudPort.write('2');      
+     writeToCloudArduinoPort('2');
   } else if (isModeSelected_prey()) {
      setupMode_prey();
-     cloudPort.write('1');
+     writeToCloudArduinoPort('1');
+  } else if (isModeSelected_social_media()) {
+    setupMode_social_media();
+    writeToCloudArduinoPort('2');
+  }
+}
+
+void writeToCloudArduinoPort(char data) {
+  if (cloudPort != null) {
+    cloudPort.write(data);
   }
 }
 
@@ -104,7 +120,7 @@ boolean isModeSelected_koiPond() {
   return (mode == 2);
 }
 
-boolean isModeSelected_distraction() {
+boolean isModeSelected_social_media() {
   return (mode == 3);
 }
 
@@ -124,7 +140,7 @@ void drawGameTimer() {
     println("hit count = " + hitCount);
     
     // hit frequecy controls the predators' speed in PREY mode (mode 1)
-    if (hitCount < 2) {
+    if (hitCount <= 2) {
       creatureMaxSpeed = 2;
     } else {
       creatureMaxSpeed = log(hitCount);
@@ -149,8 +165,7 @@ void drawGameTimer() {
 void drawText() {
   fill(Params.score_board_color);
   textSize(Params.score_board_font_size);
-  //text(sensor.getRawData(), 50, 600);
+  //println(sensor.getRawData());
   //println(sensor.getSensorDataDisplayString());
-  text(sensor.getRealHitPin(), width/2, height/2);
-  //text(ballPosition.x + "   " + ballPosition.y, width/2, height/2 + 70);
+  //text(sensor.getRealHitPin(), width/2, height/2);
 }
