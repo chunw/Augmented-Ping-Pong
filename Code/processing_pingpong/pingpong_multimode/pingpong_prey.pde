@@ -1,33 +1,29 @@
-/* "Active mode" visualization. 
+/* "Active mode" visualization.
 */
 import processing.serial.*;
- 
-float creatureMaxSpeed = 4;
- 
+
+int PREDATOR = 1;
+int TARGET = 2;
+
+float predator_radius = 40;
+float target_radius = 10;
+
 ArrayList<Creature> creatures;
 ArrayList<Wall> walls;
+
+float creatureMaxSpeed = 4;
 
 float wallx1, wallx2, wally1, wally2;
 boolean creatingWall = false;
 boolean wallBuildingMode = false;
-int gridSnap = 32;
-PFont myFont;
-
-int PREDATOR = 1;
-int PREY = 2;
-
-float predator_radius = 40;
-float prey_radius = 10;
-
-float LARGENUM = 1000000000000000.0;
+int snap = 32;
 
 void setupMode_prey() {
   creatures = new ArrayList<Creature>();
   walls = new ArrayList<Wall>();
   for (int i = 0; i < 16; i++) {
-    creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
+    creatures.add(new Creature(random(snap, width-snap), random(snap, height-snap), PREDATOR, predator_radius));
   }
-  // music
   if (player != null) {
     player.close();
   }
@@ -37,7 +33,6 @@ void setupMode_prey() {
 
 void drawMode_prey() {
   background(Params.prey_mode_score_board_bg_color);
-  
   if (keyPressed) {
     if (key == 'w') {
       wallBuildingMode = true;
@@ -48,50 +43,39 @@ void drawMode_prey() {
     }
   }
 
-  if ( wallBuildingMode == true ) {
+  if (wallBuildingMode) {
     stroke(0);
-    float snapX = round(mouseX/gridSnap)*gridSnap;
-    float snapY = round(mouseY/gridSnap)*gridSnap;
-    line(snapX-gridSnap/2, snapY, snapX+gridSnap/2, snapY);
-    line(snapX, snapY-gridSnap/2, snapX, snapY+gridSnap/2);
+    float snapX = round(mouseX/snap)*snap;
+    float snapY = round(mouseY/snap)*snap;
+    line(snapX-snap/2, snapY, snapX+snap/2, snapY);
+    line(snapX, snapY-snap/2, snapX, snapY+snap/2);
   }
 
   Creature c;
   for (int i = 0; i < creatures.size (); i++) {
     c = creatures.get(i);
-    c.applyBehaviors(creatures, walls);
+    c.apply(creatures, walls);
     c.update();
     c.display();
-    // if creature falls outside then kill it
-    /*PVector theLoc = c.getLoc();
-    if ( (theLoc.x < gridSnap) || (theLoc.x > (width-gridSnap)) || (theLoc.y < gridSnap) || (theLoc.y > (height-gridSnap)) ) {
-      creatures.remove(i);
-    }*/
   }
 
   for (Wall w : walls) {
     w.display();
   }
-
   if (creatingWall == true) {
-    //stroke(Params.prey_mode_wall_color);
     line(wallx1, wally1, mouseX, mouseY);
   }
 
   drawText();
-  
-  // NOTE: DO NOT READ SENSOR DATA IN THIS SKETCH; IT HAS BEEN READ IN THE MAIN SKETCH DRAW() LOOP!
-  
+
   if (ballPosition != null && sensor.isRealHit()) {
     drawBallPosition();
     addTarget(ballPosition.x, ballPosition.y);
-    //creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
   }
-  
+
   if (mousePressed) {
     if (wallBuildingMode == false) {
       addTarget(mouseX, mouseY);
-      //creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREDATOR, predator_radius) );
     } else {
      if (creatingWall == false) {
         creatingWall = true;
@@ -100,9 +84,9 @@ void drawMode_prey() {
       } else {
         wallx2 = mouseX;
         wally2 = mouseY;
-        if ( (abs(wally2-wally1) > gridSnap) || (abs(wallx2-wallx1) > gridSnap) ) {
+        if ( (abs(wally2-wally1) > snap) || (abs(wallx2-wallx1) > snap) ) {
           creatingWall = false;
-          walls.add( new Wall(wallx1, wally1, wallx2, wally2) );
+          walls.add(new Wall(wallx1, wally1, wallx2, wally2));
         }
       }
     }
@@ -120,25 +104,24 @@ void drawBallPosition() {
 }
 
 void addRandomPrey() {
-  creatures.add(new Creature(random(gridSnap, width - gridSnap), random(gridSnap, height-gridSnap), PREY, prey_radius) );
+  creatures.add(new Creature(random(snap, width - snap), random(snap, height-snap), TARGET, target_radius) );
 }
 
 void addTarget(float x, float y) {
   if ( detectTarget(x, y) == false ) { // targets shouldn't overlap
-    creatures.add(new Creature(x, y, PREY, prey_radius) );
+    creatures.add(new Creature(x, y, TARGET, target_radius) );
   }
 }
 
 boolean detectTarget(float x, float y) {
-  float desiredseparation, xd, yd;
+  float targetSeparation, xd, yd;
   PVector theTarget;
-  // For every boid in the system, check if it's too close
   for (int i = 0; i < creatures.size (); i++) {
     theTarget = creatures.get(i).getLoc();
-    desiredseparation = prey_radius*prey_radius;
+    targetSeparation = target_radius *target_radius;
     xd = (x - theTarget.x);
     yd = (y - theTarget.y);
-    if ((xd*xd+yd*yd) <= desiredseparation) { // target has been eaten
+    if ((xd*xd + yd*yd) <= targetSeparation) { // target has been eaten
       return true;
     }
   }
@@ -146,14 +129,13 @@ boolean detectTarget(float x, float y) {
 }
 
 class Wall {
-  PVector loc1;
-  PVector loc2;
+  PVector loc1, loc2;
   color wallColor;
 
   Wall(float x1, float y1, float x2, float y2) {
     wallColor = color(127);
-    loc1 = new PVector(round(x1/gridSnap)*gridSnap, round(y1/gridSnap)*gridSnap);
-    loc2 = new PVector(round(x2/gridSnap)*gridSnap, round(y2/gridSnap)*gridSnap);
+    loc1 = new PVector(round(x1/snap)*snap, round(y1/snap)*snap);
+    loc2 = new PVector(round(x2/snap)*snap, round(y2/snap)*snap);
   }
 
   void display() {
@@ -161,64 +143,64 @@ class Wall {
     strokeWeight(10);
     line(loc1.x, loc1.y, loc2.x, loc2.y);
   }
-
-  void setColorBlack() {
-    wallColor = color(100);
-  }
-
-  void setColorRed() {
-    wallColor = color(255, 0, 0);
-  }
 }
 
 class Creature {
-  PVector loc;
-  PVector velocity;
-  PVector acceleration;
-  float r;
-  float maxforce;    // Maximum steering force
-  float maxspeed;    // Maximum speed
+  PVector loc, velocity, acceleration;
+  float r, maxforce, maxspeed;
   color bodyColor;
-  int nMembranePoints;
-  float[] membraneDeviation;
-  float[] membraneLocX;
-  float[] membraneLocY;
-  int creatureType;
+  int numMembranes;
+  float[] membraneLocX, membraneLocY, membraneDeviation;
+  int type;
 
-  // Constructor initialize all values
-  Creature(float x, float y, int theCreatureType, float radius) {
+  Creature(float x, float y, int theType, float radius) {
     loc = new PVector(x, y);
     r = radius;
     maxspeed = creatureMaxSpeed;
     maxforce = 0.2;
     acceleration = new PVector(0, 0);
     velocity = new PVector(0, 0);
-    nMembranePoints = 32; // make this even number, preferably 2^n
-    creatureType = theCreatureType;
+    numMembranes = 32;
+    type = theType;
 
-    // make it look like a funky creature
     float r = random(255);
     float g = random(255);
     float b = random(255);
-    bodyColor = color(r, g, b); // set a random color
-    //println("r=" + r + ", g="+g + ", b="+b);
-    if (theCreatureType == PREY) {
-      bodyColor = color(0, random(200, 255), 0); // set a random color
+    bodyColor = color(r, g, b);
+    if (theType == TARGET) {
+      bodyColor = color(0, random(200, 255), 0);
       maxforce /= 4;
       maxspeed /= 4;
-      nMembranePoints /= 2;
+      numMembranes /= 2;
     }
-    // precalc location for random membrane
-    membraneDeviation = new float[nMembranePoints];
-    membraneLocX = new float[nMembranePoints];
-    membraneLocY = new float[nMembranePoints];
+    membraneDeviation = new float[numMembranes];
+    membraneLocX = new float[numMembranes];
+    membraneLocY = new float[numMembranes];
 
-    for (int i = 0; i < nMembranePoints; i++) {
+    for (int i = 0; i < numMembranes; i++) {
       membraneDeviation[i] = 0.0;
-      float angle = i * (360 / nMembranePoints);
+      float angle = i * (360 / numMembranes);
       membraneLocX[i] = cos(radians(angle));
       membraneLocY[i] = sin(radians(angle));
     }
+  }
+
+  PVector getClosestTarget(ArrayList<Creature> creatures, PVector currentLocation, int myType) {
+    PVector theTarget;
+    PVector closestTarget = null;
+    float d;
+    float closest = 1000000000000000.0;
+    for (int i = 0; i < creatures.size (); i++) {
+      theTarget = creatures.get(i).getLoc();
+      d = theTarget.dist(currentLocation, theTarget);
+      if (d < closest) {
+        if (myType != creatures.get(i).type) {
+          closestTarget = theTarget;
+          closest = d;
+        }
+      }
+    }
+    return closestTarget;
   }
 
   PVector getLoc() {
@@ -226,152 +208,89 @@ class Creature {
   }
 
   void applyForce(PVector force) {
-    acceleration.add(force); //could add mass here if we want A = F / M
+    acceleration.add(force);
   }
 
-  float getR() {
-    return r;
-  }
-
-  PVector getClosestTarget(ArrayList<Creature> creatures, PVector currentLocation, int myType) {
-    PVector theTarget;
-    PVector bestTarget = null;
-    float d;
-    float closest = LARGENUM;
-    for (int i = 0; i < creatures.size (); i++) {
-      theTarget = creatures.get(i).getLoc();
-      d = theTarget.dist(currentLocation, theTarget);
-      if (d < closest) {
-        if (myType != creatures.get(i).creatureType) {
-          bestTarget = theTarget;
-          closest = d;
-        }
-      }
+  void apply(ArrayList<Creature> creatures, ArrayList<Wall> walls) {
+    PVector separateForce = getSeparateForce(creatures, walls);
+    PVector closestTarget = getClosestTarget(creatures, loc, type);
+    if (closestTarget == null) {
+      closestTarget = loc;
     }
-    /*
-    if (bestTarget == null && myType == PREDATOR) {
-      for (int i = 0; i < 2; i++) {
-        addRandomPrey();
-      }
-    }*/
-    return bestTarget;
-  }
-
-
-  void applyBehaviors(ArrayList<Creature> creatures, ArrayList<Wall> walls) {
-
-    PVector separateForce = separate(creatures, walls);
-    PVector theTarget = getClosestTarget(creatures, loc, creatureType);
-
-    if (theTarget == null) {
-      theTarget = loc;
-    }
-
-    PVector seekForce = seek(theTarget);
-    //line(loc.x, loc.y, theTarget.x, theTarget.y); // debug
-
+    PVector seekForce = getSeekForce(closestTarget);
     separateForce.mult(2);
     seekForce.mult(1);
     applyForce(separateForce);
     applyForce(seekForce);
-
-    //collideWall(walls); // debug
   }
 
-  // A method that calculates a steering force towards a target
-  // STEER = DESIRED MINUS VELOCITY
-  PVector seek(PVector theTarget) {
-    PVector desired = PVector.sub(theTarget, loc);  // A vector pointing from the location to the target
-
-    // Normalize desired and scale to maximum speed
+  PVector getSeekForce(PVector targetLoc) {
+    PVector desired = PVector.sub(targetLoc, loc);
     desired.normalize();
     desired.mult(creatureMaxSpeed);
-    PVector steer = PVector.sub(desired, velocity); // steering = Desired minus velocity
-    steer.limit(maxforce);  // limit to maximum steering force
-    if (creatureType == PREY) {
-      steer.mult(-1.0); // go away from predator
+    PVector force = PVector.sub(desired, velocity);
+    force.limit(maxforce);
+    if (type == TARGET) {
+      force.mult(-1.0);
     }
-    return steer;
+    return force;
   }
 
-  PVector separate (ArrayList<Creature> creatures, ArrayList<Wall> walls) {
-    float desiredseparation = r*2;
+  PVector getSeparateForce(ArrayList<Creature> creatures, ArrayList<Wall> walls) {
+    float targetSeparation = r*2;
     PVector sum = new PVector();
     int count = 0;
-    // For everyone in the system, check if it's too close
     Creature other;
     for (int i = 0; i < creatures.size(); i++) {
       other = creatures.get(i);
       float d = PVector.dist(loc, other.loc);
-      desiredseparation = r + other.r;
-      // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-      if ((d > 0) && (d < desiredseparation) ) {
-        if (creatureType == other.creatureType) {
-          // Calculate vector pointing away from neighbor
+      targetSeparation = r + other.r;
+      if ((d > 0) && (d < targetSeparation) ) {
+        if (type == other.type) {
           PVector diff = PVector.sub(loc, other.loc);
           diff.normalize();
-          diff.div(d);        // Weight by distance
+          diff.div(d);
           sum.add(diff);
-          count++;            // Keep track of how many
-        } else if ( (creatureType == PREDATOR) && (other.creatureType == PREY) ) { // eat the prey
+          count++;
+        } else if ( (type == PREDATOR) && (other.type == TARGET) ) { // eat the target
           creatures.remove(i);
         }
       }
     }
 
-    // for each wall, check to see if it is too close
-    desiredseparation = r;
+    targetSeparation = r;
     PVector closest;
     for (Wall w : walls) {
-      //if ( isCollision(w.loc1.x, w.loc1.y, w.loc2.x, w.loc2.y, location.x, location.y, r) ) {
-      closest = getClosestPointToCenter(w.loc1.x, w.loc1.y, w.loc2.x, w.loc2.y, loc.x, loc.y, r);
+      closest = findClosestPointToCenter(w.loc1.x, w.loc1.y, w.loc2.x, w.loc2.y, loc.x, loc.y);
       float d = closest.dist(loc, closest);
-      if ( d <= desiredseparation ) {
-        // Calculate vector pointing away from neighbor
+      if ( d <= targetSeparation ) {
         PVector diff = PVector.sub(loc, closest);
         diff.normalize();
-        diff.div(d);        // Weight by distance
+        diff.div(d);
         sum.add(diff);
-        count++;            // Keep track of how many
+        count++;
       }
-    }   
+    }
 
-    // Average -- divide by how many
     if (count > 0) {
       sum.div(count);
-      // Our desired vector is the average scaled to maximum speed
       sum.normalize();
       sum.mult(creatureMaxSpeed);
-      // Implement Reynolds: Steering = Desired - Velocity
       sum.sub(velocity);
       sum.limit(maxforce);
     }
     return sum;
   }
 
-  // if creature collides with wall, then bounce away
-  void collideWall(ArrayList<Wall> walls) {
-    PVector closest;
-    for (Wall w : walls) {
-      closest = getClosestPointToCenter(w.loc1.x, w.loc1.y, w.loc2.x, w.loc2.y, loc.x, loc.y, r);
-      if ( closest.dist(loc, closest) <= r ) {
-        w.setColorRed();
-      } else {
-        w.setColorBlack();
-      }
-    }
-  }
-
   void update() {
     velocity.add(acceleration);
-    if (creatureType == PREDATOR) {
+    if (type == PREDATOR) {
       velocity.limit(creatureMaxSpeed);
-    } else if (creatureType == PREY) {
+    } else if (type == TARGET) {
       velocity.limit(creatureMaxSpeed / 4);
     }
-    
     loc.add(velocity);
-    acceleration.mult(0); // Reset accelertion to 0 each cycle
+    acceleration.mult(0);
   }
 
   void display() {
@@ -389,7 +308,7 @@ class Creature {
     float locX, locY;
 
     // draw the body
-    for (int i = 0; i < nMembranePoints; i++) {
+    for (int i = 0; i < numMembranes; i++) {
       deviation = membraneDeviation[i];
       deviation += r*0.05*random(-1, 1);
       deviation *= 0.95;
@@ -402,35 +321,30 @@ class Creature {
     endShape(CLOSE);
     // draw the eyes
     stroke(0);
-    int eyeIndex = round(nMembranePoints*5/8);
-    float eyeDist = 0.6;
+    int eyeIndex = round(numMembranes*5/8);
+    float eyeDistance = 0.6;
     len = r + membraneDeviation[eyeIndex];
     locX = membraneLocX[eyeIndex];
     locY = membraneLocY[eyeIndex];
     fill(255);
-    ellipse(len*locX*eyeDist, len*locY*eyeDist, len/1.5, len/1.5);
+    ellipse(len*locX*eyeDistance, len*locY*eyeDistance, len/1.5, len/1.5);
     fill(0);
-    ellipse(len*locX*eyeDist, len*locY*eyeDist, len/(4+(1-creatureType)*4), len/(4+(1-creatureType)*4));
-    eyeIndex = round(nMembranePoints*7/8);
+    ellipse(len*locX*eyeDistance, len*locY*eyeDistance, len/(4+(1-type)*4), len/(4+(1-type)*4));
+    eyeIndex = round(numMembranes*7/8);
     len = r + membraneDeviation[eyeIndex];
     locX = membraneLocX[eyeIndex];
     locY = membraneLocY[eyeIndex];
     fill(255);
-    ellipse(len*locX*eyeDist, len*locY*eyeDist, len/1.5, len/1.5);
+    ellipse(len*locX*eyeDistance, len*locY*eyeDistance, len/1.5, len/1.5);
     fill(0);
-    ellipse(len*locX*eyeDist, len*locY*eyeDist, len/(4+(1-creatureType)*4), len/(4+(1-creatureType)*4));
+    ellipse(len*locX*eyeDistance, len*locY*eyeDistance, len/(4+(1-type)*4), len/(4+(1-type)*4));
     popMatrix();
   }
 }
 
-// class to intersect lines and circles or to gest the closest point to a circle in a given segment
-PVector getClosestPointToCenter(float x1, float y1, float x2, float y2, float cx, float cy, float r) {
-  float dx;
-  float dy;
-  float sLength;
-  float sx;
-  float sy;
-  float pLength;
+// helper method
+PVector findClosestPointToCenter(float x1, float y1, float x2, float y2, float cx, float cy) {
+  float dx, dy, sLength, sx, sy, pLength;
   dx = x2-x1;
   dy = y2-y1;
   sLength = sqrt(dx*dx + dy*dy);
@@ -438,11 +352,10 @@ PVector getClosestPointToCenter(float x1, float y1, float x2, float y2, float cx
   sy = dy/sLength;
   pLength = (cx-x1)*sx + (cy-y1)*sy;
 
-  if (pLength < 0) { 
+  if (pLength < 0) {
     return new PVector(x1, y1);
   } else if (pLength > sLength) {
     return new PVector(x2, y2);
   }
-
   return new PVector(x1 + sx*pLength, y1 + sy * pLength);
 }

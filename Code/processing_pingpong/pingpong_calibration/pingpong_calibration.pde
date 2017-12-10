@@ -12,8 +12,8 @@ BallPositionSensor sensor;
 PVector ballPosition = new PVector(0, 0);
 
 void setup() {
-  //size(1000, 800);
-  fullScreen();
+  size(1000, 800);
+  //fullScreen();
   background(0);
   sensor = new BallPositionSensor(this);
 }
@@ -46,7 +46,7 @@ void drawText() {
   text(sensor.getRawData(), 50, 600);
   println(sensor.getRawData());
   
-  // make sure text used by the game are projected fine
+  // Check text projection
   fill(Params.score_board_color);
   textSize(Params.score_board_font_size);
   text("0 : 0" + "         " + "0 : 0",  width/2 - 400, Params.score_board_height);

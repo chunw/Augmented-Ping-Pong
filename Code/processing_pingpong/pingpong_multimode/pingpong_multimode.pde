@@ -27,10 +27,9 @@ int scorePlayer1 = 0;
 int scorePlayer2 = 0;
 
 void setup() {
+  size(1000, 800);
   
- //size(1000, 800);
-  
- fullScreen();
+  //fullScreen();
   
   //println(Serial.list());
   if (Params.cloudPort < Serial.list().length) {
@@ -39,8 +38,6 @@ void setup() {
   sensor = new BallPositionSensor(this);
   minim = new Minim(this);
   gameStartTime = millis();
-  myFont = createFont("Courier New", 40);
-  textFont(myFont);
   reset();
 }
 

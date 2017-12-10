@@ -1,3 +1,5 @@
+/* "Distraction mode" visualization. 
+*/
 import ddf.minim.*;
 
 ArrayList staticObjects;
@@ -18,8 +20,6 @@ PImage message_unread;
 PImage slack_read;
 PImage instagram_read;
 
-String[] social_media_sounds = new String[5];
-
 void setupMode_social_media() { 
    if (player != null) {
     player.close();
@@ -31,7 +31,6 @@ void setupMode_social_media() {
    
    initMedia();
    
-   // falling objects
    maxVel = 6;
    objects = new FallingObject[30];
    
@@ -84,11 +83,7 @@ void generateNotif() {
    int index = int(random(social_media_unread_choices.length));
    if (staticObjects != null) {
      staticObjects.add(new FallingObject(ballPosition.x, ballPosition.y, social_media_unread_choices[index], false));
-   
-     //player = minim.loadFile(social_media_sounds[index]);
-     //player.play(); 
-   }
-   
+   }   
 }
 
 void initMedia() {
@@ -103,14 +98,7 @@ void initMedia() {
   call_read = loadImage("images/read-call.png");
   call_unread = loadImage("images/unread_call.png");
   slack_read = loadImage("images/slack.png");
-  instagram_read = loadImage("images/instagram.png");
-  
-  social_media_sounds[0] = "sounds/fb.mp3";
-  social_media_sounds[1] = "sounds/message.mp3";
-  social_media_sounds[2] = "sounds/email.mp3";
-  social_media_sounds[3] = "sounds/snapchat.mp3";
-  social_media_sounds[4] = "sounds/call.mp3";
-  
+  instagram_read = loadImage("images/instagram.png");  
 }
 
 
@@ -133,7 +121,6 @@ class FallingObject{
        this.x = maxx;
        this.y = maxy;
      }
-     
      vel = random(maxVel);
      this.img = img;
    }
