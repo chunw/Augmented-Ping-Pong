@@ -1,4 +1,5 @@
 /* "Active mode" visualization.
+* Force system inspired by Diana Lange's fish sketch.
 */
 import processing.serial.*;
 
@@ -12,6 +13,7 @@ ArrayList<Creature> creatures;
 ArrayList<Wall> walls;
 
 float creatureMaxSpeed = 4;
+float creatureMaxForce = 0.2;
 
 float wallx1, wallx2, wally1, wally2;
 boolean creatingWall = false;
@@ -157,7 +159,7 @@ class Creature {
     loc = new PVector(x, y);
     r = radius;
     maxspeed = creatureMaxSpeed;
-    maxforce = 0.2;
+    maxforce = creatureMaxForce;
     acceleration = new PVector(0, 0);
     velocity = new PVector(0, 0);
     numMembranes = 32;

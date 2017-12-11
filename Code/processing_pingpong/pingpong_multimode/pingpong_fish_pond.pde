@@ -1,12 +1,12 @@
 /* "Calm mode" visualization. 
-* Modified and extended from existing sketch.
+* Extended from existing fish sketch to add tail animation and pond behavior.
 */
 float t;
 ArrayList fishes;
 PImage b;
 float numFish = 50;
 
-void setupMode_koiPond() {
+void setupMode_fishPond() {
    colorMode(HSB,360);
    background(0);
    stroke(0);
@@ -24,7 +24,7 @@ void setupMode_koiPond() {
    player.play();
 }
 
-void drawMode_koiPond() {
+void drawMode_fishPond() {
   background(0);
   t = t+1;
   for (int i = fishes.size()-1; i >= 0; i--) { 
@@ -46,18 +46,7 @@ void drawMode_koiPond() {
       fishes.remove(i);
       fishes.add(new fish(-(width/2)/18-random((3*width)/2)/18,-(height/2)/18+(floor(random(numFish))*(height/numFish))/18,(3*PI)/2,(6+floor(random(0,3))*20)/360.0,int(random(6) > 1)-random(0.1)));
     }
-  }
-  
-}
-
-float signs(float a){
-  if (a > 0){
-    return 1;
-  } else if (a == 0){
-    return 0;
-  } else{
-    return -1;
-  }
+  }  
 }
 
 class fish {
@@ -93,15 +82,15 @@ class fish {
     int len2 = -31;
     int lenfin = 40;
     float[] y2 = new float[len];
-    float[] thickness = new float[len];
-    float[] tailR = new float[len];
-    float[] tailL = new float[len];
     float[][] pHeadR = new float[3][abs(len2)];
     float[][] pHeadL = new float[3][abs(len2)];
     float[][] pFinR = new float[3][lenfin];
     float[][] pFinL = new float[3][lenfin];
     float[][] pEyeR = new float[3][lenfin];
     float[][] pEyeL = new float[3][lenfin];
+    float[] thickness = new float[len];
+    float[] tailR = new float[len];
+    float[] tailL = new float[len];
     float[][] pTailR = new float[3][len];
     float[][] pTailL = new float[3][len];
     float squareScale = (60/8)*3;
@@ -148,7 +137,7 @@ class fish {
       vertex(pHeadL[1][i]/.4,pHeadL[2][i]/.4);
     }
 
-    // add animated tail
+    // add animated tail - make tail oscillate in the sine wave manner
     for (int i = 1; i < len; i++) {
       y2[i] = (squareScale*exp(0.1/1.25*((i-1)*dx-30))-squareScale*exp(0.1/1.25*(-30)))*cos(0.2*(i-1)*dx-phi);
       thickness[i] = w*(cos(PI/(len*dx)*(i-1)*dx)+1)*0.5*int((i-1)<len);
@@ -168,8 +157,8 @@ class fish {
     endShape();
 
     // add tail tip
-    fill(((fcolor+0.05)*360),.3*360,360,300);
-    stroke(((fcolor+0.05)*360),.3*360,360,300);
+    fill(((fcolor+0.05)*360), 0.3*360, 360, 300);
+    stroke(((fcolor+0.05)*360), 0.3*360, 360, 300);
     beginShape();
     for (int i = len-15; i < len; i++) {
       vertex(pTailR[1][i]/.4,pTailR[2][i]/.4);
@@ -258,7 +247,6 @@ class fish {
     fisht = a;
     randt = b;
   }
-  
 }
 
 void drawShape(int len, float[][] shapes){
@@ -270,6 +258,16 @@ void drawShape(int len, float[][] shapes){
 }
 
 float sign(float a){
+  if (a > 0){
+    return 1;
+  } else if (a == 0){
+    return 0;
+  } else{
+    return -1;
+  }
+}
+
+float signs(float a){
   if (a > 0){
     return 1;
   } else if (a == 0){

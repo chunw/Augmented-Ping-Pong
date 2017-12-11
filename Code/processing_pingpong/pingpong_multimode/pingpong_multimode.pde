@@ -78,8 +78,8 @@ void draw() {
     }
   }
   
-  if (isModeSelected_koiPond()) {
-    drawMode_koiPond();
+  if (isModeSelected_fishPond()) {
+    drawMode_fishPond();
   } else if (isModeSelected_prey()) {
     drawMode_prey();
   } else if (isModeSelected_social_media()) {
@@ -91,8 +91,8 @@ void draw() {
 }
 
 void reset() {
-  if (isModeSelected_koiPond()) {
-     setupMode_koiPond();
+  if (isModeSelected_fishPond()) {
+     setupMode_fishPond();
      writeToCloudArduinoPort('2');
   } else if (isModeSelected_prey()) {
      setupMode_prey();
@@ -113,7 +113,7 @@ boolean isModeSelected_prey() {
   return (mode == 1);
 }
 
-boolean isModeSelected_koiPond() {
+boolean isModeSelected_fishPond() {
   return (mode == 2);
 }
 
